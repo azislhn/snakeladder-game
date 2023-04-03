@@ -1,17 +1,21 @@
 import express from "express";
+import jwt from "jsonwebtoken";
 import { pool } from "./db.js";
-import { PORT } from "./config.js";
+import { PORT, SECRET_KEY } from "./config.js";
 
 const app = express();
+const secretKey = SECRET_KEY;
 
 app.get("/", async (req, res) => {
-  res.json({ payload: "Selamat Datang" });
+  res.json({ message: "Selamat Datang" });
 });
 
 app.get("/bank-soal", async (req, res) => {
   const [fields] = await pool.query(`SELECT * FROM bank`);
-
-  res.json({ payload: "Bank Soal Kepramukaan", data: fields });
+  const token = jwt.sign({ payload: fields }, secretKey, {
+    algorithm: "HS256",
+  });
+  res.json({ token: token });
 });
 
 app.listen(PORT, () => {
